@@ -1,38 +1,90 @@
-# chat-politicas-publicas-2023102400
+# Chat – Public Policies and Affirmative Actions (FAPESP 2023/10240-0)
 
-This template should help get you started developing with Vue 3 in Vite.
+This repository contains the **frontend of the chat and question interface** for the project funded by **FAPESP (Grant No. 2023/10240-0)** titled:
+**“Public Policies and Affirmative Actions in the Public University: defining an algorithm to alert for dropout risk among university entrants through quota and reservation systems.”**
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 🎯 Project Goal
 
-## Recommended Browser Setup
+The main goal of this system is to provide an **interactive interface for university managers and educators** that combines **machine learning models and data analysis** to support decision-making related to **student retention and dropout prediction**.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+This interface allows users to interact with the intelligent system developed by the research team, serving as a tool for exploring insights and research findings on **student permanence, inclusion, and educational policy**.
 
-## Customize configuration
+---
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## 🧠 Core Research Themes
 
-## Project Setup
+The following key themes were discussed and explored throughout the chat’s development:
 
-```sh
-npm install
+* **University Dropout:** Factors influencing student retention and prediction of dropout risk.
+* **Artificial Intelligence in Education:** The use of algorithms to identify patterns and assist in academic decision-making.
+* **Affirmative Actions:** The importance of inclusion and institutional support for quota students in higher education.
+* **Public Policies and Student Retention:** How academic research can contribute to the improvement of educational public policies.
+
+The project brings together researchers from various disciplines, seeking to understand how **mathematics, technology, and education** can unite to make higher education **more inclusive and welcoming**.
+
+---
+
+## 🧩 Repository Structure
+
+```
+chat-politicas-publicas-2023102400/
+├── public/                  
+├── src/
+│   ├── assets/              
+│   │   ├── images/          
+│   │   └── styles/          
+│   ├── components/          
+│   ├── composables/         
+│   ├── router/              
+│   ├── views/               
+│   ├── App.vue              
+│   └── main.js              
+└── index.html               
 ```
 
-### Compile and Hot-Reload for Development
+---
 
-```sh
+## ⚙️ Technologies Used
+
+* **Vue.js 3** (Composition API)
+* **Vite** – Build and development tool
+* **JavaScript (ES6+)**
+* **HTML5 + CSS3** (with optional TailwindCSS integration)
+* **Node.js** – Runtime environment
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* **Node.js** version 16 or higher
+* **npm** or **yarn**
+
+### Installation and Execution
+
+```bash
+# Clone this repository
+git clone https://github.com/<username>/chat-politicas-publicas-2023102400.git
+
+# Navigate to the project folder
+cd chat-politicas-publicas-2023102400
+
+# Install dependencies
+npm install
+
+# Run the development server
 npm run dev
 ```
 
-### Compile and Minify for Production
+Once started, the application will be available at:
 
-```sh
-npm run build
 ```
+http://localhost:5173
+```
+
+---
+
+This project is for academic and research purposes.
