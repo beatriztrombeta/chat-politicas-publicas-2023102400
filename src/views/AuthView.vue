@@ -1,19 +1,25 @@
-<script setup></script>
+<script setup>
+import NavOptions from "@/components/NavOptions.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+</script>
 
 <template>
+  <NavOptions />
   <main>
     <div id="circle">
       <img id="locker" src="../assets/images/locker.svg" alt="locker svg" />
     </div>
     <section>
-      <p>Insira o código enviado para seu email institucional.</p>
+      <p>{{ t("auth.instruction") }}</p>
       <form action="">
         <div>
-          <label class="label-form" for="">Código de Verificação</label>
+          <label class="label-form" for="">{{ t("auth.codeLabel") }}</label>
           <input class="input-form" type="text" />
         </div>
         <div>
-          <button>Continuar</button>
+          <button class="blue-button">{{ t("auth.continue") }}</button>
         </div>
       </form>
     </section>
@@ -27,7 +33,7 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 #circle {
@@ -43,7 +49,7 @@ section {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-width: 19.7rem;
+  max-width: 19.7rem;
 }
 
 section p {
