@@ -1,18 +1,37 @@
 <script setup>
-import { useLogin } from "@/composables/useLogin.js";
+import { ref, watch, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
+import { useTheme } from "@/composable/useTheme";
+import NavOptions from "@/components/NavOptions.vue";
+
+const { t } = useI18n();
+const { isDark } = useTheme();
+
+const UnespLogo = ref("");
+
+function updateImages() {
+  UnespLogo.value = isDark.value
+    ? new URL("../assets/images/UNESP-dark.png", import.meta.url).href
+    : new URL("../assets/images/UNESP-light.png", import.meta.url).href;
+}
+
+onMounted(updateImages);
+watch(isDark, updateImages);
 </script>
 
+
 <template>
+  <NavOptions/>
   <main>
-    <img src="../assets/images/UNESP-light.png" alt="UNESP logo" />
+    <img :src="UnespLogo" alt="UNESP logo" />
     <section>
       <form action="">
         <div>
-          <label class="label-form" for="">E-mail</label>
+          <label class="label-form" for="">{{ t("login.emailLabel") }}</label>
           <input class="input-form" type="email" />
         </div>
         <div>
-          <button>Continuar</button>
+          <button class="blue-button">{{ t("login.continue") }}</button>
         </div>
       </form>
     </section>
@@ -21,12 +40,12 @@ import { useLogin } from "@/composables/useLogin.js";
 
 <style scoped>
 main {
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 3rem;
+  height: 100%;
 }
 
 img {
