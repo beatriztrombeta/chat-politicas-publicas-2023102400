@@ -8,7 +8,6 @@ import SettingsModal from "@/components/SettingsModal.vue";
 const { t } = useI18n();
 const { isDark } = useTheme();
 const isCollapsed = ref(false);
-const closeTabSrc = ref("");
 const showMenu = ref(false);
 const showSettings = ref(false);
 
@@ -24,17 +23,7 @@ function openSettings() {
   showSettings.value = true;
 }
 
-function updateImages() {
-  closeTabSrc.value = isDark.value
-    ? new URL("../assets/images/close-dark.svg", import.meta.url).href
-    : new URL("../assets/images/close-light.svg", import.meta.url).href;
-}
-
-onMounted(() => {
-  updateImages();
-});
-
-watch(isDark, updateImages);
+watch(isDark);
 </script>
 
 <template>
