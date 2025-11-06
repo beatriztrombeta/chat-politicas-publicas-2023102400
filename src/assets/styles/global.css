@@ -27,9 +27,12 @@ html.light {
   --darker-blue: #39bff2;
 
   --color-chat-bg: var(--blue-lighter);
+  --color-chatbar-bg: var(--blue-light);
+  --color-chatbar-hv: var(--normal-blue);
   --color-report-border: var(--blue-light);
   --color-report-bg: var(--white);
   --color-menu-bg: var(--white);
+  --color-message-bg: var(--white);
   --color-li-hover: var(--blue-lighter);
   --color-modal-bg: var(--white);
   --color-settings-bg: #ebebeb;
@@ -52,9 +55,12 @@ html.dark {
   --darker-blue: #081b26;
 
   --color-chat-bg: #0a202d;
-  --color-report-border: #0a202d;
+  --color-chatbar-bg: var(--normal-blue);
+  --color-chatbar-hv: var(--blue-light);
+  --color-report-border: #0f3042;
   --color-report-bg: #0a202d;
   --color-menu-bg: var(--darker-blue);
+  --color-message-bg: var(--normal-blue);
   --color-li-hover: #0a202d;
   --color-modal-bg: var(--darker-blue);
   --color-settings-bg: #0a202d;
