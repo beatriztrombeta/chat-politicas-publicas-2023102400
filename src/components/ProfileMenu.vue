@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useI18n } from 'vue-i18n'
 import { useRouter } from "vue-router";
+import { logout } from "@/composable/useAuth";
 
 const { t } = useI18n()
 const router = useRouter();
@@ -21,9 +22,10 @@ function openSettings() {
   emit("close");
 }
 
-function logout() {
+async function handleLogout() {
   emit("close");
-  router.push("/login");
+  await logout()
+  router.push('/login')
 }
 </script>
 
@@ -59,7 +61,7 @@ function logout() {
         </div>
       </li>
       <hr>
-      <li @click="logout">
+      <li @click="handleLogout">
         <svg class="icons" width="624" height="496" viewBox="0 0 624 496" fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <path class="fill-me"

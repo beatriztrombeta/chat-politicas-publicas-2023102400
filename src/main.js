@@ -6,6 +6,7 @@ import english from './languages/english'
 import portuguese from './languages/portuguese'
 import router from './router/index.js'
 import spanish from './languages/spanish'
+import axios from 'axios'
 
 const i18n = createI18n({
   legacy: false,
@@ -18,6 +19,9 @@ const i18n = createI18n({
     'es-ES': spanish.messages
   },
 });
+
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = import.meta.env.VITE_BACKEND_API_URL;
 
 createApp(App)
   .use(router)
