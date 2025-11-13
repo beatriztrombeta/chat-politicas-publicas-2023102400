@@ -71,9 +71,21 @@ async function handleAsk(event) {
     await nextTick();
     scrollToBottom();
 
-  } catch (err) {
+    } catch (err) {
     console.error(err);
-    error.value = "Erro ao obter resposta do chatbot.";
+    let errorMessage;
+
+    if (err.response && err.response.status === 503) {
+      errorMessage = "O servidor está temporariamente indisponível. Tente novamente em alguns minutos.";
+    } else {
+      errorMessage = "Erro ao obter resposta do chatbot.";
+    }
+
+    error.value = errorMessage;
+    messages.value.push({ text: errorMessage, sender: "bot" });
+
+    await nextTick();
+    scrollToBottom();
   } finally {
     loading.value = false;
   }
@@ -118,7 +130,7 @@ watch(isDark);
           <div v-if="loading" class="loading-spinner"></div>
         </div>
         <form @submit="handleAsk" @keydown.enter.prevent="handleAsk">
-          <input v-model="question" type="text" :placeholder="t('home.ask')" autocomplete="off" :disabled="loading"/>
+          <input v-model="question" type="text" :placeholder="t('home.ask')" autocomplete="off" :disabled="loading" />
           <button class="white" type="submit" :disabled="loading">
             <img id="arrow-top" src="../assets/images/arrow-top.svg" />
           </button>
@@ -133,7 +145,8 @@ watch(isDark);
     </div>
     <section id="report">
       <div>
-        <iframe width="600" height="450" src={{reportLink.value}} frameborder="0" style="border:0" allowfullscreen
+        <iframe v-if="reportLink" :src="reportLink" width="800" height="600" frameborder="0" allowtransparency
+          style="border:0" allowfullscreen
           sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
         </iframe>
       </div>
@@ -262,11 +275,6 @@ iframe {
   padding: 0.5rem;
 }
 
-.chat-error {
-  color: red;
-  text-align: center;
-}
-
 .message-list {
   display: flex;
   flex-direction: column;
@@ -290,11 +298,6 @@ iframe {
 
 .message.bot {
   align-self: flex-start;
-}
-
-.message.bot.error {
-  background-color: #ffdddd;
-  color: #a00;
 }
 
 .fade-up-enter-active {
@@ -326,6 +329,7 @@ input {
   background: none;
   width: 100%;
   font-family: var(--font-sans-serif);
+  color: var(--text-theme);
 }
 
 input,
