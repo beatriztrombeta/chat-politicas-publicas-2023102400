@@ -15,6 +15,10 @@ const spanish = {
       emailLabel: "Correo electrónico",
       continue: "Continuar",
     },
+    signup: {
+      emailLabel: "Correo electrónico",
+      continue: "Continuar",
+    },
     settings: {
       general: "General",
       theme: "Tema",

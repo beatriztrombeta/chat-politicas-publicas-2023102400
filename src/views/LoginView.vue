@@ -1,17 +1,14 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
 import { useTheme } from "@/composable/useTheme";
-import NavOptions from "@/components/NavOptions.vue";
-import api from "@/composable/useApi";
+import NavSignIn from "@/components/NavSignIn.vue";
+import { useRouter } from "vue-router";
+import ErrorPopup from "@/components/ErrorPopup.vue";
 
 const { t } = useI18n();
 const { isDark } = useTheme();
 const router = useRouter();
-const email = ref("");
-const loading = ref(false);
-const errorMessage = ref("");
 
 const UnespLogo = ref("");
 
@@ -21,53 +18,72 @@ function updateImages() {
     : new URL("../assets/images/UNESP-light.png", import.meta.url).href;
 }
 
-onMounted(updateImages);
-watch(isDark, updateImages);
+const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const email = ref("");
+const loading = ref(false);
+const errorMsg = ref("");
 
-async function handleSubmit(event) {
-  event.preventDefault();
-  errorMessage.value = "";
+async function onSendCode() {
+  errorMsg.value = "";
+
+  const e = email.value.trim().toLowerCase();
+  if (!e) {
+    showError("Informe um e-mail válido.");
+    return;
+  }
+
   loading.value = true;
-
   try {
-    const response = await api.post("/auth/send-code", { email: email.value });
-    localStorage.setItem("userEmail", email.value);
+    const res = await fetch(`${apiBase}/auth/send-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: e }),
+      credentials: "include",
+    });
 
-    if (response.status === 200) {
-      router.push("/auth");
-    } else {
-      errorMessage.value = "Erro ao enviar código. Tente novamente.";
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.detail || "Falha ao enviar código.");
     }
-  } catch (error) {
-    console.error(error);
-    errorMessage.value =
-      error.response?.data?.detail || "Falha ao conectar com o servidor.";
+
+    router.push({ path: "/auth", query: { email: e } });
+  } catch (err) {
+    showError(err?.message || "Erro inesperado.");
   } finally {
     loading.value = false;
   }
 }
+
+function showError(msg) {
+  errorMsg.value = msg;
+}
+
+onMounted(updateImages);
+watch(isDark, updateImages);
 </script>
 
-
 <template>
-  <NavOptions />
+  <NavSignIn />
   <main>
     <img :src="UnespLogo" alt="UNESP logo" />
     <section>
-      <form @submit="handleSubmit">
+      <form @submit.prevent="onSendCode">
         <div>
-          <label class="label-form" for="email">{{ t("login.emailLabel") }}</label>
-          <input id="email" v-model="email" class="input-form" type="email" placeholder="exemplo@unesp.br" required />
+          <label class="label-form">{{ t("login.emailLabel") }}</label>
+          <input class="input-form" type="email" v-model="email" autocomplete="email" />
         </div>
-        <div>
+        <div id="button-wrapper">
           <button class="blue-button" type="submit" :disabled="loading">
             {{ loading ? "Enviando..." : t("login.continue") }}
           </button>
+          <router-link to="/signup" class="signup-link">
+            Não possuí uma conta? Cadastre-se aqui
+          </router-link>
         </div>
-        <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
       </form>
     </section>
   </main>
+  <ErrorPopup v-model="errorMsg" title="Erro" :autoCloseMs="4000" />
 </template>
 
 <style scoped>
@@ -77,7 +93,8 @@ main {
   justify-content: center;
   align-items: center;
   gap: 3rem;
-  height: 100%;
+  min-height: 100vh;
+  padding-bottom: 3rem;
 }
 
 img {
@@ -105,7 +122,17 @@ form div {
   width: 100%;
 }
 
-a {
+#button-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.signup-link {
   font-size: 14px;
+  text-decoration: underline;
+  font-weight: normal;
+  align-self: center;
+  cursor: pointer;
 }
 </style>

@@ -1,109 +1,142 @@
 <script setup>
-import NavOptions from "@/components/NavOptions.vue";
-import axios from "axios";
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import NavSignIn from "@/components/NavSignIn.vue";
+import ErrorPopup from "@/components/ErrorPopup.vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const { t } = useI18n();
+const route = useRoute();
 const router = useRouter();
 
-const code = ref("");
-const error = ref("");
-const loading = ref(false);
-const resending = ref(false);
-const showResend = ref(false);
+const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-const apiUrl = import.meta.env.VITE_BACKEND_API_URL
+const email = computed(() => String(route.query.email || "").trim().toLowerCase());
+const code = ref("");
+const loading = ref(false);
+const errorMsg = ref("");
+const infoMsg = ref("");
 
 onMounted(() => {
-  const storedEmail = localStorage.getItem("userEmail");
-  showResend.value = !!storedEmail;
+  if (!email.value) router.replace("/login");
 });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  error.value = "";
+function showError(msg) {
+  errorMsg.value = msg;
+}
+
+async function verifyCode() {
+  infoMsg.value = "";
+  const c = code.value.trim();
+  if (!c) return showError("Informe o código.");
+
   loading.value = true;
-
-  const email = localStorage.getItem("userEmail");
-  if (!email) {
-    error.value = "E-mail não encontrado. Volte para a etapa anterior.";
-    loading.value = false;
-    return;
-  }
-
   try {
-    const res = await axios.post(
-      "/auth/verify-code",
-      {
-        email,
-        code: code.value,
-      },
-      { withCredentials: true }
-    );
-    console.log(res.data);
+    const res = await fetch(`${apiBase}/auth/verify-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.value, code: c }),
+      credentials: "include",
+    });
 
-    router.push("/home");
-  } catch (err) {
-    console.error(err);
-    error.value = "Código inválido ou erro na verificação.";
-  } finally {
-    loading.value = false;
-  }
-};
+    const body = await res.json().catch(() => ({}));
 
-async function resendCode() {
-  resending.value = true;
-  error.value = "";
-
-  try {
-    const email = localStorage.getItem("userEmail");
-    if (!email) {
-      error.value = "E-mail não encontrado. Volte para a etapa anterior.";
-      return;
+    if (!res.ok) {
+      throw new Error(body?.detail || "Código inválido ou expirado.");
     }
 
-    await axios.post(
-      "/auth/send-code",
-      { email },
-      { withCredentials: true }
-    );
+    localStorage.setItem("auth_user", JSON.stringify({
+      id_usuario: body?.id_usuario,
+      id_categoria_usuario: body?.id_categoria_usuario,
+      email: body?.email,
+      nome: body?.nome
+    }));
+
+    window.dispatchEvent(new CustomEvent("auth-user-updated", {
+      detail: {
+        id_usuario: body?.id_usuario,
+        id_categoria_usuario: body?.id_categoria_usuario,
+        email: body?.email,
+        nome: body?.nome
+      }
+    }));
+
+    const categoryId = Number(body?.id_categoria_usuario);
+    const userId = Number(body?.id_usuario);
+
+    if (categoryId === 7 && userId) {
+      router.push(`/students/${userId}`);
+    } else if ([2, 3].includes(categoryId)) {
+      router.push("/units");
+    } else if ([4, 5].includes(categoryId)) {
+      router.push("/courses");
+    } else if (categoryId === 6) {
+      router.push("/subjects");
+    } else {
+      router.push("/home");
+    }
   } catch (err) {
-    console.error(err);
-    error.value = "Erro ao reenviar código. Tente novamente.";
+    showError(err?.message || "Erro inesperado.");
   } finally {
-    resending.value = false;
+    loading.value = false;
+  }
+}
+
+async function resendCode() {
+  infoMsg.value = "";
+  if (!email.value) return;
+
+  loading.value = true;
+  try {
+    const res = await fetch(`${apiBase}/auth/send-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.value }),
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.detail || "Falha ao reenviar código.");
+    }
+
+    infoMsg.value = "Código reenviado.";
+  } catch (err) {
+    showError(err?.message || "Erro inesperado.");
+  } finally {
+    loading.value = false;
   }
 }
 </script>
 
 <template>
-  <NavOptions />
+  <NavSignIn />
   <main>
-    <div id="circle">
-      <img id="locker" src="../assets/images/locker.svg" alt="locker svg" />
-    </div>
+    <img id="locker" src="../assets/images/auth-image.png" alt="" />
     <section>
       <p>{{ t("auth.instruction") }}</p>
-      <form @submit="handleSubmit">
+
+      <form @submit.prevent="verifyCode">
         <div>
           <label class="label-form">{{ t("auth.codeLabel") }}</label>
-          <input class="input-form" v-model="code" type="text" required />
-        </div>
-        <div>
-          <button class="blue-button" :disabled="loading">
-            {{ loading ? "Verificando..." : t("auth.continue") }}
-          </button>
-          <a v-if="showResend" href="#" @click.prevent="resendCode" :style="{ opacity: resending ? 0.6 : 1 }">
-            {{ resending ? "Reenviando..." : "Reenviar código" }}
-          </a>
+          <input class="input-form" type="text" v-model="code" inputmode="numeric" autocomplete="one-time-code" />
         </div>
 
-        <p v-if="error" style="color: red; text-align: center;">{{ error }}</p>
+        <div id="button-wrapper">
+          <button class="blue-button" type="submit" :disabled="loading">
+            {{ loading ? "Validando..." : t("auth.continue") }}
+          </button>
+          <button type="button" class="link" @click="resendCode" :disabled="loading">
+            Reenviar código
+          </button>
+        </div>
       </form>
+
+      <p v-if="infoMsg" class="info">{{ infoMsg }}</p>
     </section>
   </main>
+
+  <ErrorPopup v-model="errorMsg" title="Erro" :autoCloseMs="4000" />
 </template>
 
 <style scoped>
@@ -116,13 +149,8 @@ main {
   gap: 1rem;
 }
 
-#circle {
-  border-radius: 100%;
-  border: 0.3rem solid var(--color-primary);
-}
-
-#locker {
-  width: 8rem;
+img {
+  width: 14rem;
 }
 
 section {
@@ -133,9 +161,10 @@ section {
 }
 
 section p {
-  width: 70%;
+  width: 100%;
   text-align: center;
   align-self: center;
+  margin: 0;
 }
 
 form {
@@ -150,5 +179,21 @@ form div {
   display: flex;
   flex-direction: column;
   width: 100%;
+}
+
+#button-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.link {
+  font-size: 14px;
+  text-decoration: underline;
+  font-weight: normal;
+  align-self: center;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 </style>

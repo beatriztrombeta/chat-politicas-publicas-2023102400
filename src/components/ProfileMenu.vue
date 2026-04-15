@@ -3,7 +3,6 @@ import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useI18n } from 'vue-i18n'
 import { useRouter } from "vue-router";
-import { logout } from "@/composable/useAuth";
 
 const { t } = useI18n()
 const router = useRouter();
@@ -22,10 +21,21 @@ function openSettings() {
   emit("close");
 }
 
-async function handleLogout() {
+async function logout() {
   emit("close");
-  await logout()
-  router.push('/login')
+
+  const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+  try {
+    await fetch(`${apiBase}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } finally {
+    localStorage.removeItem("auth");
+
+    window.location.href = "/login";
+  }
 }
 </script>
 
@@ -61,7 +71,7 @@ async function handleLogout() {
         </div>
       </li>
       <hr>
-      <li @click="handleLogout">
+      <li @click="logout">
         <svg class="icons" width="624" height="496" viewBox="0 0 624 496" fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <path class="fill-me"

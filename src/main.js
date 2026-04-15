@@ -1,12 +1,15 @@
 import './assets/styles/global.css'
+
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
 import App from './App.vue'
+import router from './router/index.js'
+import axios from 'axios'
+
 import english from './languages/english'
 import portuguese from './languages/portuguese'
-import router from './router/index.js'
 import spanish from './languages/spanish'
-import axios from 'axios'
+
 
 const i18n = createI18n({
   legacy: false,

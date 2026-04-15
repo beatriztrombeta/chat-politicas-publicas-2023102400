@@ -15,6 +15,10 @@ const portuguese = {
       emailLabel: "E-mail",
       continue: "Continuar",
     },
+    signup: {
+      emailLabel: "E-mail Institucional",
+      continue: "Continuar"
+    },
     settings: {
       general: "Geral",
       theme: "Tema",
